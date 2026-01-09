@@ -618,17 +618,24 @@
             document.getElementById('hint-btn').disabled = true;
             document.getElementById('hint-btn').textContent = 'हिंट उपयोग किया गया';
         }
-
-     // ==================== GOOGLE FORM SUBMISSION ====================
+// ==================== GOOGLE FORM SUBMISSION ====================
         function submitToGoogleForm() {
             // Your Google Form submission URL
             const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSc8ioKMJNCZT7cIlhde6LMgNPu-j_2qg-CccfOOhWs0KByeVQ/formResponse';
             
-            // Calculate time taken (in MM:SS format)
+            // Calculate time taken (in HH:MM:SS format)
             const timeTaken = TOTAL_TIME - timeRemaining;
-            const minutesTaken = Math.floor(timeTaken / 60);
-            const secondsTaken = timeTaken % 60;
-            const formattedTimeTaken = `${minutesTaken.toString().padStart(2, '0')}:${secondsTaken.toString().padStart(2, '0')}`;
+            const hours = Math.floor(timeTaken / 3600);
+            const minutes = Math.floor((timeTaken % 3600) / 60);
+            const seconds = timeTaken % 60;
+            const formattedTimeTaken = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Get current submission time (12-hour format with AM/PM)
+            const now = new Date();
+            let hours12 = now.getHours();
+            const ampm = hours12 >= 12 ? 'PM' : 'AM';
+            hours12 = hours12 % 12 || 12; // Convert to 12-hour format
+            const submissionTime = `${hours12.toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} ${ampm}`;
             
             // Create form data with correct entry IDs
             const formData = new FormData();
@@ -638,8 +645,8 @@
             formData.append('entry.61619156', answers[3] || 'No answer provided');   // Stage 3
             formData.append('entry.905620087', answers[4] || 'No answer provided');  // Stage 4
             formData.append('entry.79399607', answers[5] || 'No answer provided');   // Stage 5
-            formData.append('entry.387381016', formattedTimeTaken);  // Time taken
-            formData.append('entry.2144931789', hintUsed ? 'हाँ (Yes)' : 'नहीं (No)'); // Hint used
+            formData.append('entry.387381016', formattedTimeTaken);  // Total time taken (HH:MM:SS)
+            formData.append('entry.2144931789', submissionTime); // Submission time (12:13 AM)
             
             // Disable submit button to prevent double submission
             const submitBtn = document.getElementById('submit-btn');
@@ -658,7 +665,7 @@
                 console.log('Submission Summary:', {
                     playerName: window.playerName,
                     timeTaken: formattedTimeTaken,
-                    hintUsed: hintUsed,
+                    submissionTime: submissionTime,
                     answers: answers
                 });
                 
